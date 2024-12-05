@@ -5,37 +5,37 @@ use std::num::ParseIntError;
 
 #[derive(Debug)]
 enum AocError {
-    Error(Error),
-    Regex(regex::Error),
-    ParseInt(ParseIntError),
+    Error(()),
+    Regex(()),
+    ParseInt(()),
 }
 
 impl From<Error> for AocError {
-    fn from(err: Error) -> AocError {
-        AocError::Error(err)
+    fn from(_err: Error) -> AocError {
+        AocError::Error(())
     }
 }
 
 impl From<regex::Error> for AocError {
-    fn from(err: regex::Error) -> AocError {
-        AocError::Regex(err)
+    fn from(_err: regex::Error) -> AocError {
+        AocError::Regex(())
     }
 }
 
 impl From<ParseIntError> for AocError {
-    fn from(err: ParseIntError) -> AocError {
-        AocError::ParseInt(err)
+    fn from(_err: ParseIntError) -> AocError {
+        AocError::ParseInt(())
     }
 }
 
 fn convert(input: &str) -> Result<u32, AocError> {
-    input.parse::<u32>().map_err(AocError::ParseInt)
+    input.parse::<u32>().map_err(|_error| AocError::ParseInt(()))
 }
 
 #[test]
 fn part_one() -> Result<(), AocError> {
-    let lines = common::lines("inputs/day_3.txt").map_err(AocError::Error)?;
-    let regex = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").map_err(AocError::Regex)?;
+    let lines = common::lines("inputs/day_3.txt").map_err(|_error| AocError::Error(()))?;
+    let regex = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").map_err(|_error| AocError::Regex(()))?;
 
     let sum = lines
         .map(|line| match line {
@@ -64,9 +64,9 @@ fn part_one() -> Result<(), AocError> {
 
 #[test]
 fn part_two() -> Result<(), AocError> {
-    let mut lines = common::lines("inputs/day_3.txt").map_err(AocError::Error)?;
-    let regex =
-        Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don't\(\)").map_err(AocError::Regex)?;
+    let lines = common::lines("inputs/day_3.txt").map_err(|_error| AocError::Error(()))?;
+    let regex = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don't\(\)")
+        .map_err(|_error| AocError::Regex(()))?;
 
     let mut skip = false;
 
@@ -77,7 +77,7 @@ fn part_two() -> Result<(), AocError> {
                 .filter_map(|capture| {
                     if capture[0].eq("do()") {
                         skip = false
-                    } else if capture[0].eq("don't()")  {
+                    } else if capture[0].eq("don't()") {
                         skip = true
                     } else {
                         return if skip {
@@ -90,7 +90,7 @@ fn part_two() -> Result<(), AocError> {
                                 (Ok(x), Ok(y)) => Some(x * y),
                                 _ => None,
                             }
-                        }
+                        };
                     }
 
                     None
