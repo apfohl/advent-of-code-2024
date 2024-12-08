@@ -1,8 +1,8 @@
-use std::collections::HashSet;
 use crate::common::lines;
+use std::collections::HashSet;
 use std::io::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 enum Direction {
     Up,
     Right,
@@ -10,7 +10,7 @@ enum Direction {
     Left,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Guard {
     x: usize,
     y: usize,
@@ -125,6 +125,57 @@ fn part_one() -> Result<(), Error> {
     }
 
     println!("{}", visited.len());
+
+    Ok(())
+}
+
+#[test]
+fn part_two() -> Result<(), Error> {
+    let (width, height, obstructions, guard) = load_puzzle()?;
+
+    let mut obstacles: usize = 0;
+
+    for y in 0..height + 1 {
+        for x in 0..width + 1 {
+            println!("RUN: {} {}", x, y);
+            let mut guard = guard.clone();
+            let mut obstructions = obstructions.clone();
+            obstructions.push((x, y)); // additional obstruction
+
+            let mut running = true;
+            let mut starting = true;
+
+            let mut visited = HashSet::new();
+            let _ = visited.insert(guard.clone());
+
+            while running {
+                let next_location = guard.next_location();
+
+                if let Some(is_free) = check_location(width, height, &obstructions, next_location) {
+                    if !is_free {
+                        guard.turn_right();
+                    }
+
+                    guard.step_forward();
+                } else {
+                    running = false;
+                    break;
+                }
+
+                if starting {
+                    starting = false
+                } else if visited.contains(&guard) {
+                    obstacles += 1;
+                    println!("OBSTACLES: {}", obstacles);
+                    break;
+                }
+
+                let _ = visited.insert(guard.clone());
+            }
+        }
+    }
+
+    println!("OBSTACLES: {}", obstacles);
 
     Ok(())
 }
