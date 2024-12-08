@@ -109,6 +109,7 @@ fn part_one() -> Result<(), Error> {
     let mut visited = HashSet::new();
 
     while running {
+        let _ = visited.insert((guard.x, guard.y));
         let next_location = guard.next_location();
 
         if let Some(is_free) = check_location(width, height, &obstructions, next_location) {
@@ -117,8 +118,6 @@ fn part_one() -> Result<(), Error> {
             }
 
             guard.step_forward();
-
-            let _ = visited.insert((guard.x, guard.y));
         } else {
             running = false;
             println!("GUARD: {:?}", guard);
