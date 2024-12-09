@@ -99,8 +99,7 @@ fn check_location(
     }
 }
 
-#[test]
-fn part_one() -> Result<(), Error> {
+fn calulate_visited() -> Result<HashSet<(usize, usize)>, Error> {
     let (width, height, obstructions, guard) = load_puzzle()?;
     let mut guard = guard;
 
@@ -120,9 +119,15 @@ fn part_one() -> Result<(), Error> {
             guard.step_forward();
         } else {
             running = false;
-            println!("GUARD: {:?}", guard);
         }
     }
+
+    Ok(visited)
+}
+
+#[test]
+fn part_one() -> Result<(), Error> {
+    let visited = calulate_visited()?;
 
     println!("{}", visited.len());
 
@@ -131,51 +136,61 @@ fn part_one() -> Result<(), Error> {
 
 #[test]
 fn part_two() -> Result<(), Error> {
+    println!("START");
     let (width, height, obstructions, guard) = load_puzzle()?;
+    println!("DIMENSIONS: {} {}", width, height);
 
     let mut obstacles: usize = 0;
 
-    for y in 0..height + 1 {
-        for x in 0..width + 1 {
-            println!("RUN: {} {}", x, y);
-            let mut guard = guard.clone();
-            let mut obstructions = obstructions.clone();
-            obstructions.push((x, y)); // additional obstruction
+    let mut v = calulate_visited()?;
+    println!("START REMOVED {}", v.remove(&(guard.x, guard.y)));
 
-            let mut running = true;
-            let mut starting = true;
+    for (i, (x, y)) in v.iter().enumerate() {
+        println!("RUN: {i} {x} {y}");
+        let mut guard = guard.clone();
+        let mut obstructions = obstructions.clone();
+        obstructions.push((*x, *y)); // additional obstruction
 
-            let mut visited = HashSet::new();
-            let _ = visited.insert(guard.clone());
+        let mut running = true;
 
-            while running {
-                let next_location = guard.next_location();
+        let mut visited = HashSet::new();
+        let _ = visited.insert(guard.clone());
 
-                if let Some(is_free) = check_location(width, height, &obstructions, next_location) {
-                    if !is_free {
-                        guard.turn_right();
+        while running {
+            let next_location = guard.next_location();
+
+            if let Some(is_free) = check_location(width, height, &obstructions, next_location) {
+                if !is_free {
+                    guard.turn_right();
+
+                    let mut guard_clone = guard.clone();
+                    guard_clone.step_forward();
+                    if let Some(false) = check_location(
+                        width,
+                        height,
+                        &obstructions,
+                        (guard_clone.x as isize, guard_clone.y as isize),
+                    ) {
+                        guard.turn_right()
                     }
-
-                    guard.step_forward();
-                } else {
-                    running = false;
-                    break;
                 }
 
-                if starting {
-                    starting = false
-                } else if visited.contains(&guard) {
-                    obstacles += 1;
-                    println!("OBSTACLES: {}", obstacles);
-                    break;
-                }
-
-                let _ = visited.insert(guard.clone());
+                guard.step_forward();
+            } else {
+                running = false;
+                break;
             }
+
+            if visited.contains(&guard) {
+                obstacles += 1;
+                break;
+            }
+
+            let _ = visited.insert(guard.clone());
         }
     }
 
-    println!("OBSTACLES: {}", obstacles);
+    println!("OBSTACLES: {}", obstacles); // 1617
 
     Ok(())
 }
