@@ -99,7 +99,7 @@ fn check_location(
     }
 }
 
-fn calulate_visited() -> Result<HashSet<(usize, usize)>, Error> {
+fn calculate_visited() -> Result<HashSet<(usize, usize)>, Error> {
     let (width, height, obstructions, guard) = load_puzzle()?;
     let mut guard = guard;
 
@@ -127,7 +127,7 @@ fn calulate_visited() -> Result<HashSet<(usize, usize)>, Error> {
 
 #[test]
 fn part_one() -> Result<(), Error> {
-    let visited = calulate_visited()?;
+    let visited = calculate_visited()?;
 
     println!("{}", visited.len());
 
@@ -142,7 +142,7 @@ fn part_two() -> Result<(), Error> {
 
     let mut obstacles: usize = 0;
 
-    let mut v = calulate_visited()?;
+    let mut v = calculate_visited()?;
     println!("START REMOVED {}", v.remove(&(guard.x, guard.y)));
 
     for (i, (x, y)) in v.iter().enumerate() {
@@ -151,12 +151,10 @@ fn part_two() -> Result<(), Error> {
         let mut obstructions = obstructions.clone();
         obstructions.push((*x, *y)); // additional obstruction
 
-        let mut running = true;
-
         let mut visited = HashSet::new();
         let _ = visited.insert(guard.clone());
 
-        while running {
+        loop {
             let next_location = guard.next_location();
 
             if let Some(is_free) = check_location(width, height, &obstructions, next_location) {
@@ -177,7 +175,6 @@ fn part_two() -> Result<(), Error> {
 
                 guard.step_forward();
             } else {
-                running = false;
                 break;
             }
 
@@ -190,7 +187,7 @@ fn part_two() -> Result<(), Error> {
         }
     }
 
-    println!("OBSTACLES: {}", obstacles); // 1617
+    println!("OBSTACLES: {}", obstacles);
 
     Ok(())
 }

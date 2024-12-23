@@ -125,7 +125,6 @@ fn part_two() -> Result<(), Error> {
 
         if broken {
             fixed.push(update.clone());
-            broken = false;
         }
     }
 
