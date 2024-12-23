@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::io::Error;
 
 fn load_puzzle() -> Result<Vec<Vec<char>>, Error> {
-    let puzzle: Vec<Vec<char>> = lines("inputs/day_8_test.txt")?
+    let puzzle: Vec<Vec<char>> = lines("inputs/day_8.txt")?
         .filter_map(|line| match line {
             Ok(line) => Some(line.chars().collect()),
             Err(_) => None,
@@ -121,20 +121,21 @@ fn part_one() -> Result<(), Error> {
 
     // println!("{:?}", antennas);
 
-    for (character, points) in &antennas {
-        println!("Character: {}, Points: {:?}", character, points);
+    for (_, points) in &antennas {
+        // println!("Character: {}, Points: {:?}", character, points);
 
         let points = calculate_antinodes_for_antennas(points, dimensions);
 
-        println!("POINTS: {:?}", points);
+        // println!("POINTS: {:?}", points);
 
-        points.into_iter().for_each(|(x, y)| match puzzle[y][x] {
-            '.' => puzzle[y][x] = '#',
-            character => puzzle[y][x] = character,
+        points.into_iter().for_each(|(x, y)| {
+            if puzzle[y][x] != '#' {
+                puzzle[y][x] = '#'
+            }
         })
     }
 
-    println!("{:?}", puzzle);
+    // println!("{:?}", puzzle);
 
     let count = puzzle.iter().flatten().filter(|&&c| c == '#').count();
     println!("{count}");
