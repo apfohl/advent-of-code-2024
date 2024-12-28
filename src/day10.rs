@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use std::io::Error;
 
 fn load_puzzle() -> Result<Vec<Vec<i8>>, Error> {
-    Ok(lines("inputs/day_10_test.txt")?
+    Ok(lines("inputs/day_10.txt")?
         .filter_map(|line| match line {
             Ok(line) => Some(
                 line.chars()
@@ -47,27 +47,18 @@ fn walk_paths(map: &Vec<Vec<i8>>, start: (usize, usize)) -> Vec<(usize, usize)> 
         return vec![start];
     }
 
-    let steps = directions(map, start);
-    let heads = steps
+    directions(map, start)
         .iter()
-        .map(|&point| {
-            walk_paths(&map, point)
-                .into_iter()
-                .collect::<HashSet<_>>()
-                .into_iter()
-                .collect::<Vec<(usize, usize)>>()
-        })
+        .map(|&point| walk_paths(&map, point))
         .flatten()
-        .collect::<Vec<(usize, usize)>>();
-
-    heads
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect::<Vec<(usize, usize)>>()
 }
 
 #[test]
 fn part_one() -> Result<(), Error> {
     let map = load_puzzle()?;
-
-    // println!("{:?}", map);
 
     let mut trailheads = vec![];
 
@@ -80,7 +71,7 @@ fn part_one() -> Result<(), Error> {
         }
     }
 
-    println!("{:?}", trailheads);
+    println!("{}", trailheads.iter().sum::<usize>());
 
     Ok(())
 }
