@@ -47,46 +47,40 @@ fn walk_paths(map: &Vec<Vec<i8>>, start: (usize, usize)) -> Vec<(usize, usize)> 
         return vec![start];
     }
 
-    let paths = directions(map, start);
-    let map1 = paths
+    let steps = directions(map, start);
+    let heads = steps
         .iter()
-        .filter_map(|&point| {
-            let ends = walk_paths(&map, point);
-
-            if ends.len() == 0 {
-                None
-            } else {
-                Some(ends)
-            }
+        .map(|&point| {
+            walk_paths(&map, point)
+                .into_iter()
+                .collect::<HashSet<_>>()
+                .into_iter()
+                .collect::<Vec<(usize, usize)>>()
         })
         .flatten()
         .collect::<Vec<(usize, usize)>>();
-    map1
+
+    heads
 }
 
 #[test]
 fn part_one() -> Result<(), Error> {
     let map = load_puzzle()?;
 
-    println!("{:?}", map);
+    // println!("{:?}", map);
 
-    let mut scores = vec![];
+    let mut trailheads = vec![];
 
     for y in 0..map.len() {
         for x in 0..map[0].len() {
             if map[y][x] == 0 {
-                scores.extend(walk_paths(&map, (x, y)))
+                let paths = walk_paths(&map, (x, y));
+                trailheads.push(paths.len())
             }
         }
     }
 
-    let vec1 = scores
-        .into_iter()
-        .collect::<HashSet<_>>()
-        .into_iter()
-        .collect::<Vec<(usize, usize)>>();
-
-    println!("{}", vec1.len());
+    println!("{:?}", trailheads);
 
     Ok(())
 }
