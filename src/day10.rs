@@ -65,8 +65,7 @@ fn part_one() -> Result<(), Error> {
     for y in 0..map.len() {
         for x in 0..map[0].len() {
             if map[y][x] == 0 {
-                let paths = walk_paths(&map, (x, y));
-                trailheads.push(paths.len())
+                trailheads.push(walk_paths(&map, (x, y)).len())
             }
         }
     }
@@ -76,7 +75,35 @@ fn part_one() -> Result<(), Error> {
     Ok(())
 }
 
+fn walk_paths_two(map: &Vec<Vec<i8>>, start: (usize, usize)) -> Vec<(usize, usize)> {
+    let (x, y) = start;
+
+    if map[y][x] == 9 {
+        return vec![start];
+    }
+
+    directions(map, start)
+        .iter()
+        .map(|&point| walk_paths_two(&map, point))
+        .flatten()
+        .collect::<Vec<(usize, usize)>>()
+}
+
 #[test]
 fn part_two() -> Result<(), Error> {
+    let map = load_puzzle()?;
+
+    let mut scores = vec![];
+
+    for y in 0..map.len() {
+        for x in 0..map[0].len() {
+            if map[y][x] == 0 {
+                scores.extend(walk_paths_two(&map, (x, y)))
+            }
+        }
+    }
+
+    println!("{}", scores.len());
+
     Ok(())
 }
