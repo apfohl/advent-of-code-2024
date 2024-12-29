@@ -1,8 +1,9 @@
+use std::collections::HashSet;
 use crate::common::lines;
 use std::io::Error;
 
 fn load_puzzle() -> Result<Vec<usize>, Error> {
-    let puzzle = lines("inputs/day_11.txt")?
+    let puzzle = lines("inputs/day_11_test.txt")?
         .find_map(|line| match line {
             Ok(line) => Some(
                 line.split_whitespace()
@@ -61,13 +62,38 @@ fn part_one() -> Result<(), Error> {
     Ok(())
 }
 
+fn dfs(stones: &Vec<usize>) -> usize {
+    let mut counter = stones.len();
+    let mut visited: HashSet<usize> = HashSet::new();
+    let mut stack = stones.clone();
+
+    while let Some(stone) = stack.pop() {
+        let new_stones = handle_stone(stone);
+
+        counter += new_stones.len();
+
+        for new_stone in new_stones {
+            if visited.contains(&new_stone) {
+                continue
+            }
+
+            visited.insert(new_stone);
+            stack.push(new_stone)
+        }
+    }
+
+    counter
+}
+
 #[test]
 fn part_two() -> Result<(), Error> {
     let stones = load_puzzle()?;
 
     println!("{:?}", stones);
 
-    println!("{}", stones.len());
+    let count = dfs(&stones);
+
+    println!("{}", count);
 
     Ok(())
 }
