@@ -1,9 +1,9 @@
-use std::collections::HashSet;
 use crate::common::lines;
+use std::collections::HashMap;
 use std::io::Error;
 
 fn load_puzzle() -> Result<Vec<usize>, Error> {
-    let puzzle = lines("inputs/day_11_test.txt")?
+    let puzzle = lines("inputs/day_11.txt")?
         .find_map(|line| match line {
             Ok(line) => Some(
                 line.split_whitespace()
@@ -62,27 +62,23 @@ fn part_one() -> Result<(), Error> {
     Ok(())
 }
 
-fn dfs(stones: &Vec<usize>) -> usize {
-    let mut counter = stones.len();
-    let mut visited: HashSet<usize> = HashSet::new();
-    let mut stack = stones.clone();
-
-    while let Some(stone) = stack.pop() {
-        let new_stones = handle_stone(stone);
-
-        counter += new_stones.len();
-
-        for new_stone in new_stones {
-            if visited.contains(&new_stone) {
-                continue
-            }
-
-            visited.insert(new_stone);
-            stack.push(new_stone)
-        }
+fn blink(cache: &mut HashMap<(usize, usize), usize>, stone: usize, depth: usize) -> usize {
+    if depth == 0 {
+        cache.insert((stone, depth), 1);
+        return 1;
     }
 
-    counter
+    if let Some(&value) = cache.get(&(stone, depth)) {
+        return value;
+    }
+
+    let sum = handle_stone(stone)
+        .into_iter()
+        .map(|s| blink(cache, s, depth - 1))
+        .sum();
+    cache.insert((stone, depth), sum);
+
+    sum
 }
 
 #[test]
@@ -91,7 +87,12 @@ fn part_two() -> Result<(), Error> {
 
     println!("{:?}", stones);
 
-    let count = dfs(&stones);
+    let mut cache: HashMap<(usize, usize), usize> = HashMap::new();
+
+    let count = stones
+        .into_iter()
+        .map(|stone| blink(&mut cache, stone, 75))
+        .sum::<usize>();
 
     println!("{}", count);
 
