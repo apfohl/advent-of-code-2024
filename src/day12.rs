@@ -2,7 +2,7 @@ use crate::common::lines;
 use std::io::Error;
 
 fn load_puzzle() -> Result<Vec<Vec<char>>, Error> {
-    let puzzle: Vec<Vec<char>> = lines("inputs/day_12_test.txt")?
+    let puzzle: Vec<Vec<char>> = lines("inputs/day_12.txt")?
         .filter_map(|line| match line {
             Ok(line) => Some(line.chars().collect()),
             Err(_) => None,
@@ -49,7 +49,7 @@ fn count_corners(crops: &Vec<Vec<char>>, position: (usize, usize), plant: char) 
             .collect::<Vec<bool>>();
 
         match points[..] {
-            [false, false, false] => result += 1,
+            [false, _, false] => result += 1,
             [true, false, true] => result += 1,
             _ => {}
         }
@@ -77,7 +77,6 @@ fn dfs(
         visited[y][x] = true;
 
         fields += 1;
-
         corners += count_corners(crops, (x, y), crops[y][x]);
 
         for (dx, dy) in DIRECTIONS {
@@ -116,7 +115,7 @@ fn find_regions(crops: &Vec<Vec<char>>) {
             price_one += fields * edges;
             price_two += fields * corners;
 
-            println!("{crop}: {fields} {edges} {corners}")
+            // println!("{crop}: {fields} {edges} {corners}")
         }
     }
 
@@ -127,8 +126,6 @@ fn find_regions(crops: &Vec<Vec<char>>) {
 #[test]
 fn solve() -> Result<(), Error> {
     let crops = load_puzzle()?;
-
-    // println!("{:?}", crops);
 
     find_regions(&crops);
 
