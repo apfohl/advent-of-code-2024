@@ -23,6 +23,7 @@ fn dfs(
     let mut stack = vec![start];
 
     let mut fields = 0usize;
+    let mut edges = 0usize;
 
     while let Some((x, y)) = stack.pop() {
         if visited[y][x] {
@@ -32,21 +33,40 @@ fn dfs(
 
         fields += 1;
 
-        DIRECTIONS
-            .into_iter()
-            .filter_map(|(dx, dy)| {
-                let new_x = (start.0 as isize + dx) as usize;
-                let new_y = (start.1 as isize + dy) as usize;
+        for (dx, dy) in DIRECTIONS {
+            let new_x = (x as isize + dx) as usize;
+            let new_y = (y as isize + dy) as usize;
 
-                match crops.get(new_y).and_then(|row| row.get(new_x)) {
-                    Some(&c) if c == crop && !visited[new_y][new_x] => Some((new_x, new_y)),
-                    _ => None,
+            if let Some(&c) = crops.get(new_y).and_then(|row| row.get(new_x)) {
+                if visited[new_y][new_x] {
+                    continue;
                 }
-            })
-            .for_each(|point| stack.push(point))
+
+                if c == crop {
+                    stack.push((new_x, new_y))
+                } else {
+                    edges += 1
+                }
+            } else {
+                edges += 1
+            }
+        }
+
+        // DIRECTIONS
+        //     .into_iter()
+        //     .filter_map(|(dx, dy)| {
+        //         let new_x = (x as isize + dx) as usize;
+        //         let new_y = (y as isize + dy) as usize;
+        //
+        //         match crops.get(new_y).and_then(|row| row.get(new_x)) {
+        //             Some(&c) if c == crop && !visited[new_y][new_x] => Some((new_x, new_y)),
+        //             _ => None,
+        //         }
+        //     })
+        //     .for_each(|point| stack.push(point))
     }
 
-    (fields, 0)
+    (fields, edges)
 }
 
 fn find_regions(crops: &Vec<Vec<char>>) {
