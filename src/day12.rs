@@ -2,7 +2,7 @@ use crate::common::lines;
 use std::io::Error;
 
 fn load_puzzle() -> Result<Vec<Vec<char>>, Error> {
-    let puzzle: Vec<Vec<char>> = lines("inputs/day_12_test.txt")?
+    let puzzle: Vec<Vec<char>> = lines("inputs/day_12.txt")?
         .filter_map(|line| match line {
             Ok(line) => Some(line.chars().collect()),
             Err(_) => None,
@@ -37,33 +37,17 @@ fn dfs(
             let new_x = (x as isize + dx) as usize;
             let new_y = (y as isize + dy) as usize;
 
-            if let Some(&c) = crops.get(new_y).and_then(|row| row.get(new_x)) {
-                if visited[new_y][new_x] {
-                    continue;
-                }
-
-                if c == crop {
-                    stack.push((new_x, new_y))
-                } else {
-                    edges += 1
+            if let Some(&col) = crops.get(new_y).and_then(|row| row.get(new_x)) {
+                match col {
+                    c if c != crop => edges += 1,
+                    c if c == crop && !visited[new_y][new_x] => stack.push((new_x, new_y)),
+                    _ => continue,
                 }
             } else {
+                // out of bounds
                 edges += 1
             }
         }
-
-        // DIRECTIONS
-        //     .into_iter()
-        //     .filter_map(|(dx, dy)| {
-        //         let new_x = (x as isize + dx) as usize;
-        //         let new_y = (y as isize + dy) as usize;
-        //
-        //         match crops.get(new_y).and_then(|row| row.get(new_x)) {
-        //             Some(&c) if c == crop && !visited[new_y][new_x] => Some((new_x, new_y)),
-        //             _ => None,
-        //         }
-        //     })
-        //     .for_each(|point| stack.push(point))
     }
 
     (fields, edges)
@@ -72,6 +56,8 @@ fn dfs(
 fn find_regions(crops: &Vec<Vec<char>>) {
     let mut visited = vec![vec![false; crops[0].len()]; crops.len()];
 
+    let mut price = 0usize;
+
     for (y, &ref row) in crops.iter().enumerate() {
         for (x, &crop) in row.iter().enumerate() {
             if visited[y][x] {
@@ -79,16 +65,20 @@ fn find_regions(crops: &Vec<Vec<char>>) {
             }
 
             let (fields, edges) = dfs(crops, &mut visited, (x, y), crop);
-            println!("{crop}: {fields} {edges}")
+            price += fields * edges;
+
+            // println!("{crop}: {fields} {edges}")
         }
     }
+
+    println!("{price}")
 }
 
 #[test]
 fn part_one() -> Result<(), Error> {
     let crops = load_puzzle()?;
 
-    println!("{:?}", crops);
+    // println!("{:?}", crops);
 
     find_regions(&crops);
 
