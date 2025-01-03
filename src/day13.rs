@@ -1,4 +1,5 @@
 use crate::common::lines;
+use itertools::Itertools;
 use regex::Regex;
 use std::io::Error;
 
@@ -18,14 +19,20 @@ impl Point {
 
     fn parse_button(input: String) -> Option<Self> {
         let regex = Regex::new(r"Button \w: X\+(\d+), Y\+(\d+)").ok()?;
-        let caps = regex.captures(&input)?;
-        Some(Point::new(caps[1].parse().ok()?, caps[2].parse().ok()?))
+        let captures = regex.captures(&input)?;
+        Some(Point::new(
+            captures[1].parse().ok()?,
+            captures[2].parse().ok()?,
+        ))
     }
 
     fn parse_prize(input: String) -> Option<Self> {
         let regex = Regex::new(r"Prize: X=(\d+), Y=(\d+)").ok()?;
-        let caps = regex.captures(&input)?;
-        Some(Point::new(caps[1].parse().ok()?, caps[2].parse().ok()?))
+        let captures = regex.captures(&input)?;
+        Some(Point::new(
+            captures[1].parse().ok()?,
+            captures[2].parse().ok()?,
+        ))
     }
 }
 
@@ -57,22 +64,12 @@ impl Game {
 }
 
 fn load_puzzle() -> Result<Vec<Game>, Error> {
-    let mut lines = lines("inputs/day_13_test.txt")?
+    Ok(lines("inputs/day_13_test.txt")?
         .filter_map(|line| line.ok())
-        .filter(|line| !line.trim().is_empty());
-
-    let mut games: Vec<Game> = vec![];
-
-    while let Some(game) = lines
-        .next()
-        .zip(lines.next())
-        .zip(lines.next())
-        .and_then(|((a, b), prize)| Game::new((a, b, prize)))
-    {
-        games.push(game)
-    }
-
-    Ok(games)
+        .filter(|line| !line.trim().is_empty())
+        .tuples()
+        .filter_map(|(a, b, prize)| Game::new((a, b, prize)))
+        .collect())
 }
 
 #[test]
